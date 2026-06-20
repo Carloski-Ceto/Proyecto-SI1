@@ -397,3 +397,97 @@ def reporte_consultas_por_especialista_export(request):
         ('total_consultas', 'Total consultas'),
     ]
     return _export_response(request, 'reporte-consultas-por-especialista', 'Consultas por especialista', columns, body['items'])
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsAdministrativoOrAdmin])
+def analizar_reporte_por_voz(request):
+    """
+    Receives a voice transcript, queries all 3 report datasets,
+    and uses Gemini to generate a natural-language analysis.
+    """
+    import json
+    import google.generativeai as genai
+    from django.conf import settings as django_settings
+
+    transcript = (request.data.get('transcript') or '').strip()
+    if not transcript:
+        return Response({'error': 'El transcript no puede estar vacío.'}, status=400)
+
+    # Build a fake GET request-like object so _resolve_range can read query_params.
+    # We accept date_from/date_to from the POST body OR query string.
+    date_from = request.data.get('date_from') or request.query_params.get('date_from')
+    date_to   = request.data.get('date_to')   or request.query_params.get('date_to')
+
+    # Patch query_params in-place so _resolve_range picks them up.
+    qp = request.query_params.copy()
+    if date_from:
+        qp['date_from'] = date_from
+    if date_to:
+        qp['date_to'] = date_to
+    # Temporarily override the request's query_params.
+    original_qp = request._request.GET
+    request._request.GET = qp
+
+    start_dt, end_dt, period_type, error = _resolve_range(request, default_mode='monthly')
+
+    # Restore original query_params.
+    request._request.GET = original_qp
+
+    if error:
+        return Response({'error': error}, status=400)
+
+    # Reuse existing builder functions — no duplicated ORM.
+    pacientes_body    = _build_pacientes_atendidos(start_dt, end_dt)
+    citas_body        = _build_citas_por_periodo(start_dt, end_dt)
+    especialistas_body = _build_consultas_por_especialista(start_dt, end_dt)
+
+    # Slim down items for the prompt (avoid sending hundreds of rows to Gemini).
+    context_data = {
+        'periodo': {
+            'desde': start_dt.date().isoformat(),
+            'hasta': end_dt.date().isoformat(),
+            'tipo': period_type,
+        },
+        'pacientes_atendidos': {
+            'summary': pacientes_body['summary'],
+            'items': pacientes_body['items'][:20],
+        },
+        'citas_por_periodo': {
+            'summary': citas_body['summary'],
+            'items': citas_body['items'][:50],
+        },
+        'consultas_por_especialista': {
+            'summary': especialistas_body['summary'],
+            'items': especialistas_body['items'][:20],
+        },
+    }
+
+    prompt = (
+        f"Sos un analista de reportes médicos de una clínica oftalmológica llamada Clínica de Ojos Norte.\n"
+        f"Tenés acceso a los siguientes datos del período "
+        f"{context_data['periodo']['desde']} al {context_data['periodo']['hasta']}:\n\n"
+        f"{json.dumps(context_data, ensure_ascii=False, indent=2)}\n\n"
+        f"El usuario dice: \"{transcript}\"\n\n"
+        f"Respondé en español con un análisis claro, conciso y útil basado SOLO en los datos proporcionados. "
+        f"Si el usuario pide algo que no está en los datos, indicalo brevemente. "
+        f"Usá bullet points cuando ayude a la claridad. Máximo 300 palabras."
+    )
+
+    api_key = django_settings.GEMINI_API_KEY
+    if not api_key:
+        return Response({'error': 'GEMINI_API_KEY no configurada en el servidor.'}, status=503)
+
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        gemini_response = model.generate_content(prompt)
+        analisis = gemini_response.text
+    except Exception as exc:
+        return Response({'error': f'Error al llamar a Gemini: {str(exc)}'}, status=502)
+
+    return Response({
+        'analisis': analisis,
+        'periodo': context_data['periodo'],
+        'datos': context_data,
+    })

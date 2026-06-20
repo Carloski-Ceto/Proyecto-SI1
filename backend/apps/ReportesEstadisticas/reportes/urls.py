@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    analizar_reporte_por_voz,
     reporte_citas_por_periodo,
     reporte_citas_por_periodo_export,
     reporte_consultas_por_especialista,
@@ -16,4 +17,5 @@ urlpatterns = [
     path('reportes/citas-por-periodo/export', reporte_citas_por_periodo_export, name='reporte-citas-por-periodo-export'),
     path('reportes/consultas-por-especialista', reporte_consultas_por_especialista, name='reporte-consultas-por-especialista'),
     path('reportes/consultas-por-especialista/export', reporte_consultas_por_especialista_export, name='reporte-consultas-por-especialista-export'),
+    path('reportes/analizar-por-voz', analizar_reporte_por_voz, name='reporte-analizar-por-voz'),
 ]
