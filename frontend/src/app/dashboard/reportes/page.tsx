@@ -6,6 +6,8 @@ import { useDashboardUser } from '@/contexts/DashboardUserContext';
 import { canViewClinicalModule } from '@/lib/authorization';
 import styles from './page.module.css';
 
+type SpeechRecognitionConstructor = new () => SpeechRecognition;
+
 type PacienteAtendido = {
   id_paciente: number;
   paciente: string;
@@ -45,7 +47,10 @@ function normalize(v: unknown): string { return v == null ? '' : String(v).toLow
 function apiErr(e: unknown): string {
   const d = (e as { response?: { data?: Record<string, unknown> | string } }).response?.data;
   if (typeof d === 'string') return d;
-  if (d && typeof d === 'object' && typeof d.detail === 'string') return d.detail;
+  if (d && typeof d === 'object') {
+    if (typeof d.detail === 'string') return d.detail;
+    if (typeof d.error === 'string') return d.error;
+  }
   return 'No se pudo cargar reportes.';
 }
 function fmtDateTime(value: string | null): string {
@@ -75,6 +80,14 @@ export default function ReportesPage() {
   const [rp1, setRp1] = useState<ReportRes<PacienteAtendido> | null>(null);
   const [rp2, setRp2] = useState<ReportRes<CitaPorEstado> | null>(null);
   const [rp3, setRp3] = useState<ReportRes<ConsultaEspecialista> | null>(null);
+
+  // Voice analysis state
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [voiceAnalisis, setVoiceAnalisis] = useState<string | null>(null);
+  const [voiceLoading, setVoiceLoading] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [voicePeriodo, setVoicePeriodo] = useState<{ desde: string; hasta: string } | null>(null);
 
   useEffect(() => {
     if (!me) return;
@@ -141,6 +154,73 @@ export default function ReportesPage() {
   const citasView = useMemo(() => paginate(citasFiltered, prefs.citas.page, prefs.citas.pageSize), [citasFiltered, prefs.citas.page, prefs.citas.pageSize]);
   const especialistasView = useMemo(() => paginate(especialistasFiltered, prefs.especialistas.page, prefs.especialistas.pageSize), [especialistasFiltered, prefs.especialistas.page, prefs.especialistas.pageSize]);
 
+  function startListening() {
+    const SpeechRecognition =
+      (window as unknown as { SpeechRecognition?: SpeechRecognitionConstructor; webkitSpeechRecognition?: SpeechRecognitionConstructor })
+        .SpeechRecognition ??
+      (window as unknown as { webkitSpeechRecognition?: SpeechRecognitionConstructor })
+        .webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setVoiceError('Tu navegador no soporta reconocimiento de voz. Probá Chrome.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => { setIsListening(false); setVoiceError('Error al escuchar. Intentá de nuevo.'); };
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const text = event.results[0][0].transcript;
+      setTranscript(text);
+    };
+
+    recognition.start();
+  }
+
+  async function analizarPorVoz() {
+    if (!transcript.trim()) { setVoiceError('Escribí o dictá una consulta primero.'); return; }
+    setVoiceLoading(true);
+    setVoiceError(null);
+    setVoiceAnalisis(null);
+    try {
+      const res = await api.post<{ analisis: string; periodo: { desde: string; hasta: string } }>(
+        '/api/reportes/analizar-por-voz',
+        { transcript: transcript.trim(), date_from: dateFrom, date_to: dateTo },
+      );
+      setVoiceAnalisis(res.data.analisis);
+      setVoicePeriodo(res.data.periodo);
+    } catch (e) {
+      setVoiceError(apiErr(e));
+    } finally {
+      setVoiceLoading(false);
+    }
+  }
+
+  async function descargarReporteVoz(formato: 'xlsx' | 'pdf' | 'csv') {
+    const periodo = voicePeriodo ?? { desde: dateFrom, hasta: dateTo };
+    const params = new URLSearchParams({
+      file_format: formato,
+      date_from: periodo.desde,
+      date_to: periodo.hasta,
+    });
+    try {
+      const res = await api.get(`/api/reportes/pacientes-atendidos/export?${params.toString()}`, { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data as Blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reporte-voz-${periodo.desde}-${periodo.hasta}.${formato}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setVoiceError('No se pudo descargar el reporte.');
+    }
+  }
+
   async function exportReport(kind: 'pacientes-atendidos' | 'citas-por-periodo' | 'consultas-por-especialista', format: 'csv' | 'xlsx' | 'pdf') {
     const st = kind === 'pacientes-atendidos' ? prefs.pacientes : kind === 'citas-por-periodo' ? prefs.citas : prefs.especialistas;
     const q = new URLSearchParams({
@@ -177,6 +257,71 @@ export default function ReportesPage() {
         <div className={styles.field}><label>Hasta</label><input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} /></div>
         <div className={styles.actions}><button type="button" className={styles.btnPrimary} onClick={() => void load()} disabled={loading || !canView}>{loading ? 'Generando...' : 'Generar reportes'}</button></div>
       </div>
+
+      {/* Voice AI analysis section */}
+      <section className={styles.voiceSection}>
+        <div className={styles.voiceHeader}>
+          <h2 className={styles.sectionTitle}>Análisis por voz con IA</h2>
+          <p className={styles.sectionSubtitle}>
+            Dictá o escribí una consulta y Gemini analizará los datos del período seleccionado.
+          </p>
+        </div>
+
+        <div className={styles.voiceInputRow}>
+          <button
+            type="button"
+            className={`${styles.micBtn} ${isListening ? styles.micBtnActive : ''}`}
+            onClick={startListening}
+            disabled={isListening || voiceLoading}
+            title={isListening ? 'Escuchando...' : 'Hablar'}
+          >
+            {isListening ? '🎙️' : '🎤'}
+          </button>
+          <textarea
+            className={styles.voiceTextarea}
+            placeholder="Dictá o escribí tu consulta. Ej: ¿Cuántos pacientes fueron atendidos este mes?"
+            value={transcript}
+            onChange={(e) => setTranscript(e.target.value)}
+            rows={2}
+          />
+          <button
+            type="button"
+            className={styles.btnPrimary}
+            onClick={() => void analizarPorVoz()}
+            disabled={voiceLoading || !transcript.trim()}
+          >
+            {voiceLoading ? 'Analizando...' : 'Analizar'}
+          </button>
+        </div>
+
+        {voiceError && <div className={styles.err}>{voiceError}</div>}
+
+        {voiceAnalisis && (
+          <div className={styles.voiceResult}>
+            <div className={styles.voiceResultHeader}>
+              <span className={styles.voiceResultLabel}>Análisis de Gemini</span>
+              {voicePeriodo && (
+                <span className={styles.voicePeriodoTag}>
+                  {voicePeriodo.desde} → {voicePeriodo.hasta}
+                </span>
+              )}
+            </div>
+            <p className={styles.voiceResultText}>{voiceAnalisis}</p>
+            <div className={styles.voiceDownloads}>
+              <span className={styles.downloadLabel}>Descargar reporte completo:</span>
+              <button type="button" className={styles.btnDownload} onClick={() => void descargarReporteVoz('xlsx')}>
+                Excel
+              </button>
+              <button type="button" className={styles.btnDownload} onClick={() => void descargarReporteVoz('pdf')}>
+                PDF
+              </button>
+              <button type="button" className={styles.btnDownload} onClick={() => void descargarReporteVoz('csv')}>
+                CSV
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
 
       <section className={styles.sectionCard}>
         <div className={styles.sectionHead}><h3 className={styles.sectionTitle}>Pacientes atendidos</h3><div className={styles.actions}><button className={styles.btnGhost} onClick={() => void exportReport('pacientes-atendidos', 'csv')}>CSV</button><button className={styles.btnGhost} onClick={() => void exportReport('pacientes-atendidos', 'xlsx')}>Excel</button><button className={styles.btnGhost} onClick={() => void exportReport('pacientes-atendidos', 'pdf')}>PDF</button></div></div>

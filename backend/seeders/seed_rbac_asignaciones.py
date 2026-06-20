@@ -28,6 +28,7 @@ ROLE_PERMISSION_CODES = {
         'historialclinico.listar', 'historialclinico.archivar',
         'dashboard.ver',
         'reportes.ver',
+        'historialclinico.listar', 'historialclinico.archivar', 'historialclinico.restaurar',
     ],
     'Operador IAM': [
         'users.listar', 'users.ver', 'users.crear', 'users.editar',
@@ -75,6 +76,7 @@ ROLE_PERMISSION_CODES = {
         'evoluciones.listar', 'evoluciones.crear', 'evoluciones.editar',
         'historialclinico.listar',
         'reportes.ver',
+        'historialclinico.listar',
     ],
 }
 
