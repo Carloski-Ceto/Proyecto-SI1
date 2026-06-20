@@ -26,6 +26,8 @@ Lista priorizada de los siguientes pasos a realizar en el proyecto Oftalmología
 ## Corto Plazo
 - [x] Backend: Implementar Caso de Uso "Emitir receta de medicamentos" (CU16) con base de datos (PostgreSQL JSONField), endpoints anidados, control de accesos RBAC granulares (permisos en seeders), registro en bitácora de auditoría y suite de pruebas unitarias (4/4 pasando con éxito).
 - [x] Frontend: Diseñar y conectar interfaz "Emitir Recetas" (CU16) en Next.js con layout en doble columna, campos dinámicos reactivos para agregar/remover medicamentos y estilos CSS `@media print` para impresión oficial limpia.
+- [x] Backend: Implementar Caso de Uso "Registrar antecedentes del paciente" (CU19) con base de datos, enrutamiento nested, control de acceso RBAC granular (permisos en seeders), logs en bitácora, serializador enriquecido con registrado_por_nombre, y suite de 9 pruebas unitarias pasando al 100%.
+- [x] Frontend: Diseñar y conectar interfaz split-screen premium para registrar antecedentes del paciente (CU19) con filtros dinámicos por tipo, edición en sitio y eliminación física de registros controlada por RBAC.
 - [x] Backend: Implementar Caso de Uso "Gestionar evolución del paciente" (CU15) con base de datos, enrutamiento nested, control de acceso RBAC granular (permisos en seeders), logs en bitácora y suite de pruebas unitarias/integración (10/10 pasando).
 - [x] Frontend: Diseñar y conectar interfaz para la evolución del paciente (CU15) anidada bajo el expediente del Historial Clínico.
 - [x] Frontend: conectar módulos clínicos al backend nuevo (pacientes, especialistas, horarios, citas, agenda, consulta) en versión base operativa.

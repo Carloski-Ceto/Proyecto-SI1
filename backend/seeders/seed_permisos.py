@@ -72,6 +72,12 @@ PERMISOS = [
     {'codigo': 'recetas.editar',   'nombre': 'Editar receta médica',     'modulo': 'recetas'},
     {'codigo': 'recetas.eliminar', 'nombre': 'Eliminar receta médica',   'modulo': 'recetas'},
 
+    # Antecedentes
+    {'codigo': 'antecedentes.listar',   'nombre': 'Listar antecedentes',   'modulo': 'antecedentes'},
+    {'codigo': 'antecedentes.crear',    'nombre': 'Crear antecedente',      'modulo': 'antecedentes'},
+    {'codigo': 'antecedentes.editar',   'nombre': 'Editar antecedente',     'modulo': 'antecedentes'},
+    {'codigo': 'antecedentes.eliminar', 'nombre': 'Eliminar antecedente',   'modulo': 'antecedentes'},
+
     # Historial Clínico
     {'codigo': 'historialclinico.listar',   'nombre': 'Listar historial clínico',   'modulo': 'historialclinico'},
     {'codigo': 'historialclinico.archivar', 'nombre': 'Archivar historial clínico', 'modulo': 'historialclinico'},
