@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import api from '@/lib/api';
 import { useDashboardUser } from '@/contexts/DashboardUserContext';
 import { canViewClinicalModule, canWriteModule } from '@/lib/authorization';
@@ -128,6 +129,17 @@ export default function RecetasPage() {
       setError('No tienes permiso para ver el módulo de emisión de recetas.');
     }
   }, [canView, loadHistoriales]);
+
+  // Efecto para imprimir la receta cuando esté montada en el DOM
+  useEffect(() => {
+    if (recetaToPrint) {
+      const timer = setTimeout(() => {
+        window.print();
+        setRecetaToPrint(null);
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [recetaToPrint]);
 
   // Load recipes for the selected patient
   const loadRecetas = useCallback(async (historialId: number) => {
@@ -290,9 +302,6 @@ export default function RecetasPage() {
 
   const handlePrint = (receta: RecetaRow) => {
     setRecetaToPrint(receta);
-    setTimeout(() => {
-      window.print();
-    }, 150);
   };
 
   const totalHistorialesPages = Math.max(1, Math.ceil(historialesCount / PAGE_SIZE));
@@ -714,7 +723,7 @@ export default function RecetasPage() {
       </div>
 
       {/* ÁREA DE IMPRESIÓN EXCLUSIVA (OCULTA EN PANTALLA) */}
-      {recetaToPrint && (
+      {recetaToPrint && typeof document !== 'undefined' && createPortal(
         <div id="print-area" className={styles.printContainer}>
           <div className={styles.printHeader}>
             <h2>CLÍNICA DE OJOS NORTE</h2>
@@ -770,7 +779,8 @@ export default function RecetasPage() {
               <p>{recetaToPrint.registrado_por_nombre || me?.nombre_completo || me?.username || 'Médico Autorizado'}</p>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   );

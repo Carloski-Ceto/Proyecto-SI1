@@ -3,7 +3,24 @@
 *Sincronización de documentación con el código en repo.*
 
 ## Fecha
-2026-06-20
+2026-06-22
+
+## Actualización rápida (2026-06-22 - Antigravity/MCP)
+1. **Compatibilidad de servidores MCP en Windows para Antigravity:**
+   - **Archivo modificado:** [opencode.jsonc](file:///e:/Clinica%20Ojos%20Norte/ClinicaOjosNorte/Proyecto-SI1/opencode.jsonc)
+   - **Cambio:** Se actualizó el comando de ejecución del servidor local `drawio` de `"npx"` a `"npx.cmd"`.
+   - **Razón:** En entornos de ejecución nativos de Windows, el comando de Node `npx` no es un ejecutable PE de Windows, sino un script por lotes (`npx.cmd`). Cuando los agentes como Antigravity o el propio motor de OpenCode ejecutan comandos del MCP local sin shell para evitar riesgos de inyección, el sistema devuelve `ENOENT` si se busca `"npx"`. El uso de `"npx.cmd"` soluciona este problema y permite levantar el servidor MCP de diagramas con éxito.
+   - **Validación:** Se ejecutó con éxito `opencode debug config` para comprobar la validez del esquema y la compatibilidad de configuración.
+2. **Análisis de Clases del Caso de Uso 16 (Emitir Receta de Medicamentos) en Enterprise Architect:**
+   - **Paquete modificado:** `"Analisis de Clase CU16"` (ID: 12) -> Diagrama de clases `"Model"` (ID: 14).
+   - **Cambio:** Se diseñaron las clases de análisis en formato de rectángulos UML tradicionales utilizando estereotipos personalizados (`<<interface>>`, `<<Controller>>`, `<<Entidad>>`, `<<enumeration>>`) e integrando el actor `Médico Especialista`. Se detallaron las propiedades técnicas del backend de Django (viewset attributes, queryset, serializadores, filtersets) y las operaciones asociadas de persistencia y UI.
+   - **Conectores:** Se crearon las asociaciones no direccionadas e indicadas para el flujo de mensajes y la dependencia etiquetada como `"Use"` desde `Bitácora` hacia la enumeración `AccionBitacora`.
+   - **Validación:** Recarga visual del diagrama exitosa y exportación a PNG verificada mediante el visor del MCP, garantizando representación en rectángulos tradicionales.
+3. **Corrección de Impresión de Receta Médica (CU16):**
+   - **Archivos modificados:** [page.tsx](file:///e:/Clinica%20Ojos%20Norte/ClinicaOjosNorte/Proyecto-SI1/frontend/src/app/dashboard/recetas/page.tsx) y [page.module.css](file:///e:/Clinica%20Ojos%20Norte/ClinicaOjosNorte/Proyecto-SI1/frontend/src/app/dashboard/recetas/page.module.css)
+   - **Cambio:** Se implementó `createPortal` para inyectar la receta (`#print-area`) en `document.body`. El CSS de impresión se configuró como `:global(body) > *:not(:global(#print-area)) { display: none !important; }`, utilizando un delay de `150ms` para permitir el layout/paint visual antes de abrir el cuadro de diálogo de impresión.
+   - **Razón:** El procesador de CSS Modules de Next.js le aplicaba un hash dinámico al ID `#print-area` en el archivo CSS (compilándolo como `#page_print-area__hash`), pero en el DOM del Portal el ID permanecía de forma literal como `id="print-area"`. Al no coincidir, el navegador interpretaba que la receta encajaba en la negación `:not` y la ocultaba. Envolver el ID en `:global(#print-area)` previene este hasheo y soluciona el ocultamiento.
+   - **Validación:** Se reinició el frontend en Docker, limpiando la caché. La receta oficial ahora se visualiza correctamente en una sola hoja limpia de impresión.
 
 ## Actualización rápida (2026-06-20 - recetas)
 1. **Caso de Uso "Emitir receta de medicamentos" (CU16) implementado en Backend y Frontend:**
