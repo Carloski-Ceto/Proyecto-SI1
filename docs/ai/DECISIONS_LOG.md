@@ -10,6 +10,13 @@ Este archivo documenta todas las decisiones técnicas arquitectónicas important
 
 ---
 
+### Registro 66
+
+**Fecha:** 2026-06-22
+**Decisión:** Cambiar `"npx"` por `"npx.cmd"` en el comando del servidor local MCP `drawio` en `opencode.jsonc` para compatibilidad de subprocesos en Windows.
+**Motivo:** En sistemas Windows, el comando de Node `npx` no se puede invocar de forma directa sin shell como si fuera un ejecutable nativo, ya que es un script por lotes (`npx.cmd`). Cuando los agentes como Antigravity o el motor de OpenCode ejecutan comandos MCP locales de forma directa sin shell por motivos de seguridad, el sistema falla con `ENOENT`. El uso de `"npx.cmd"` resuelve el problema de arranque y mantiene la compatibilidad de OpenCode en todos los entornos Windows del equipo de desarrollo.
+**Impacto:** Se modificó `opencode.jsonc` y se verificó que la configuración es 100% válida ejecutando exitosamente `opencode debug config`.
+
 ### Registro 65
 
 **Fecha:** 2026-06-20

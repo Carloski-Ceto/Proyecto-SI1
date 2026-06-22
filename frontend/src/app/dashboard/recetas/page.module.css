@@ -648,28 +648,32 @@
 }
 
 @media print {
-  /* Ocultar la app completa de Next.js */
-  :global(#__next), 
-  :global(#root),
-  :global(body) > *:not(.printContainer):not(#print-area) {
+  /* Ocultar la aplicación completa de Next.js u otros wrappers que están al nivel de body */
+  :global(body) > *:not(:global(#print-area)) {
     display: none !important;
   }
 
+  /* Asegurar que body e html permitan el flujo correcto sin límites de altura */
+  html,
   body {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
     background: white !important;
     color: black !important;
-    font-family: 'Times New Roman', Times, serif; /* Formato médico tradicional */
-    margin: 0;
-    padding: 0;
   }
 
+  /* Estilos específicos y visualización del contenedor de impresión */
   .printContainer {
     display: block !important;
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2.5cm;
-    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 2.5cm !important;
+    box-sizing: border-box !important;
+    font-family: 'Times New Roman', Times, serif !important; /* Formato médico tradicional */
+    background: white !important;
+    color: black !important;
   }
 
   .printHeader {

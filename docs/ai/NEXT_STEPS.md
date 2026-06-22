@@ -21,11 +21,12 @@ Lista priorizada de los siguientes pasos a realizar en el proyecto Oftalmología
 - [ ] Probar tareas VS Code (`Run Task`) para validar comandos rápidos en entorno real.
 - [ ] Validar que runtime/agente que uses interpreta correctamente frontmatter en `.agents/agents/*.md`.
 - [ ] Probar routing del `orchestrator` con casos que deban escalar a `architect-planner` e `infra`.
-- [ ] Ejecutar `opencode debug config` para validar carga de agentes en runtime local (si CLI disponible en entorno).
+- [x] Ejecutar `opencode debug config` para validar carga de agentes en runtime local y compatibilidad de archivos de configuración.
 
 ## Corto Plazo
+- [x] UML/Diseño: Diseñar y diagramar el Análisis de Clases (clases de robustez con rectángulos tradicionales) del Caso de Uso 16 (Emitir Receta de Medicamentos) en Enterprise Architect dentro del paquete "Analisis de Clase CU16" (2026-06-22).
 - [x] Backend: Implementar Caso de Uso "Emitir receta de medicamentos" (CU16) con base de datos (PostgreSQL JSONField), endpoints anidados, control de accesos RBAC granulares (permisos en seeders), registro en bitácora de auditoría y suite de pruebas unitarias (4/4 pasando con éxito).
-- [x] Frontend: Diseñar y conectar interfaz "Emitir Recetas" (CU16) en Next.js con layout en doble columna, campos dinámicos reactivos para agregar/remover medicamentos y estilos CSS `@media print` para impresión oficial limpia.
+- [x] Frontend: Diseñar y conectar interfaz "Emitir Recetas" (CU16) en Next.js con layout en doble columna, campos dinámicos reactivos para agregar/remover medicamentos y estilos CSS @media print para impresión oficial limpia.
 - [x] Backend: Implementar Caso de Uso "Registrar antecedentes del paciente" (CU19) con base de datos, enrutamiento nested, control de acceso RBAC granular (permisos en seeders), logs en bitácora, serializador enriquecido con registrado_por_nombre, y suite de 9 pruebas unitarias pasando al 100%.
 - [x] Frontend: Diseñar y conectar interfaz split-screen premium para registrar antecedentes del paciente (CU19) con filtros dinámicos por tipo, edición en sitio y eliminación física de registros controlada por RBAC.
 - [x] Backend: Implementar Caso de Uso "Gestionar evolución del paciente" (CU15) con base de datos, enrutamiento nested, control de acceso RBAC granular (permisos en seeders), logs en bitácora y suite de pruebas unitarias/integración (10/10 pasando).

@@ -55,6 +55,7 @@
   - Incorpora un formulario dinámico que permite añadir/remover medicamentos de forma reactiva, validando obligatoriedad de dosis, frecuencia y duración, asociando de forma inmutable la firma del médico logueado.
   - Implementa edición inline reactiva y borrado seguro de recetas emitidas en la columna de recetas anteriores, regulado bajo permisos de RBAC (`canWrite` evaluando `recetas.editar` y `recetas.eliminar`).
   - Diseñado con soporte de impresión profesional mediante CSS `@media print` que oculta el portal web e imprime una receta de medicamentos limpia y formateada.
+  - **Análisis de Clases (Enterprise Architect - 2026-06-22):** Se diseñó y diagramó el análisis de clases en el paquete `"Analisis de Clase CU16"` (diagrama de clases `"Model"` ID 14) utilizando rectángulos UML tradicionales y estereotipos adaptados (`<<interface>>`, `<<Controller>>`, `<<Entidad>>`, `<<enumeration>>`) de acuerdo con los lineamientos visuales del proyecto. Las clases (`UI Recetas`, `RecetaController`, `HistorialClinico`, `RecetaMedicamento`, `Bitácora`, `AccionBitacora` y el actor `Médico Especialista`) incluyen detalles técnicos del backend de Django (viewset attributes, queryset, serializadores) y del frontend Next.js.
 - **Módulo Antecedentes del Paciente (CU19 - 2026-06-20):**
   - Implementado como página dedicada independiente en `/dashboard/antecedentes`.
   - Ofrece un diseño split-screen premium:
@@ -244,5 +245,9 @@ El archivo **`BaseDeDatos.sql`** (DBML para dbdiagram.io) debe mantenerse alinea
 - Se agregó `.vscode/tasks.json` con tareas operativas rápidas: abrir docs/ai clave, `docker compose up --build`, `migrate`, `seed`, `git status`.
 - Objetivo: reducir pasos manuales y estandarizar ejecución del flujo agente-first.
 
+## Integración de MCP con Antigravity (Windows)
+- **Compatibilidad de comandos locales en Windows (2026-06-22):** Se modificó `opencode.jsonc` para cambiar `"npx"` por `"npx.cmd"` en el comando de inicio del servidor MCP de `drawio`. Esto garantiza que los procesos de Node se inicien correctamente en entornos de Windows (como el de Antigravity) sin requerir un emulador de shell completo, evitando el error `ENOENT` al levantar servidores MCP locales.
+
 ---
-*(Actualizado: 2026-06-20)*
+*(Actualizado: 2026-06-22)*
+
