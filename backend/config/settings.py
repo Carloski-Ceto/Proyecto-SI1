@@ -70,7 +70,7 @@ LOCAL_APPS = [
     'apps.GestionClinica.consultas',
     'apps.GestionClinica.evoluciones',
     'apps.GestionClinica.recetas',
-    'apps.GestionClinica.recetas_opticas',
+    'apps.GestionClinica.recetas_opticas', # CU17 Emitir receta de lentes/contacto
     'apps.ReportesEstadisticas.dashboard',
     'apps.ReportesEstadisticas.reportes',
     'apps.HistorialClinico.historial',  # CU20 Archivar historial clínico

@@ -23,7 +23,7 @@ from apps.HistorialClinico.historial.models import EstadoHistorial, HistorialCli
 from apps.Usuarios.users.models import EstadoUsuario, TipoUsuario, Usuario
 
 
-DEMO_DOCUMENTO = 'CU17-DEMO-001'
+DEMO_DOCUMENTO = 'CU-17D3M0111'
 DEMO_MOTIVO_PREFIX = 'Demo CU17 - examen de refraccion'
 
 
@@ -80,8 +80,8 @@ def run():
     paciente, paciente_creado = Paciente.objects.get_or_create(
         documento_identidad=DEMO_DOCUMENTO,
         defaults={
-            'nombres': 'Paciente',
-            'apellidos': 'Demo CU17',
+            'nombres': 'Paula',
+            'apellidos': 'Dante Claros',
             'fecha_nacimiento': date(1991, 6, 17),
             'sexo': 'F',
             'telefono': '70017017',
