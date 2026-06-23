@@ -76,6 +76,7 @@ LOCAL_APPS = [
     'apps.HistorialClinico.historial',  # CU20 Archivar historial clínico
     'apps.HistorialClinico.antecedentes',  # CU19 Registrar antecedentes del paciente
     'apps.GestionClinica.pagos',
+    'apps.asistente',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

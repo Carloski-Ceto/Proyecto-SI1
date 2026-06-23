@@ -42,6 +42,9 @@ api_patterns = [
     path('', include('apps.HistorialClinico.historial.urls')),
     path('', include('apps.HistorialClinico.antecedentes.urls')),
     path('', include('apps.GestionClinica.pagos.urls')),
+
+    # Asistente IA oftalmológico
+    path('', include('apps.asistente.urls')),
 ]
 
 urlpatterns = [

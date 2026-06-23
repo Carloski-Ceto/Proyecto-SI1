@@ -65,7 +65,7 @@ export default function ContrasenaPage() {
         <h1 className={styles.title}>Cambiar contraseña</h1>
         <p className={styles.muted}>
           Indica tu contraseña actual y elige una nueva de al menos 8 caracteres, con una mayúscula,
-          una minúscula y un número. Solo se permiten letras y números.
+          una minúscula, un número y un símbolo especial (ej: !, @, #, $).
         </p>
       </div>
 

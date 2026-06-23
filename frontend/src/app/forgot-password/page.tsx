@@ -394,7 +394,7 @@ export default function ForgotPasswordPage() {
             <form className={styles.form} onSubmit={submitNewPassword} noValidate>
               <div className={styles.formGroup}>
                 <p className={styles.infoMessage}>
-                  Usa al menos 8 caracteres con una mayúscula, una minúscula y un número. Solo letras y números.
+                  Usa al menos 8 caracteres con una mayúscula, una minúscula, un número y un símbolo especial (ej: !, @, #, $).
                 </p>
                 <label className={styles.label} htmlFor="fp-pw1">
                   Nueva contraseña

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import DashboardNavbar from '@/components/DashboardNavbar';
+import ChatWidget from '@/components/ChatWidget';
 import { DashboardUserProvider } from '@/contexts/DashboardUserContext';
 import { getAccessToken } from '@/lib/auth';
 import styles from './layout.module.css';
@@ -46,6 +47,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <DashboardNavbar onMenuToggle={toggle} />
           <main className={styles.content}>{children}</main>
         </div>
+        <ChatWidget />
       </div>
     </DashboardUserProvider>
   );
